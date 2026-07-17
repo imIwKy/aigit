@@ -1,9 +1,9 @@
-from aigit.git import GitError, GitRepository
+from aigit.git import GitError, GitRepositoryPort
 from aigit.providers import LlmProvider
 
 
 def run_commit_workflow(
-    repository: GitRepository,
+    repository: GitRepositoryPort,
     provider: LlmProvider,
 ) -> int:
     if not repository.is_repository():
