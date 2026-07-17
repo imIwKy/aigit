@@ -1,0 +1,11 @@
+{
+  "provider": {
+    "name": "openai",
+    "model": "gpt-4o-mini",
+    "system_prompt": "Generate concise Conventional Commit messages.",
+    "temperature": 0.2
+  },
+  "commit": {
+    "max_title_length": 72
+  }
+}

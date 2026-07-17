@@ -1,8 +1,11 @@
 import argparse
 from collections.abc import Sequence
 
+from aigit.config.environment import load_environment
+from aigit.config.loader import ConfigError, load_config
 from aigit.git import GitRepository
 from aigit.providers import FakeProvider
+from aigit.providers.factory import ProviderFactory
 from aigit.workflows.commit import run_commit_workflow
 
 
@@ -43,11 +46,25 @@ def build_parser() -> argparse.ArgumentParser:
 
 
 def run_command(args: argparse.Namespace) -> int:
-    if args.command == "commit":
-        repository = GitRepository()
-        provider = FakeProvider()
+    load_environment()
 
-        return run_commit_workflow(repository, provider)
+    try:
+        config = load_config()
+    except ConfigError as error:
+        print(f"Configuration error: {error}")
+        return 1
+
+    if args.command == "commit":
+        try:
+            provider = ProviderFactory().create(config.provider)
+        except Exception as error:
+            print(f"Provider error: {error}")
+            return 1
+
+        return run_commit_workflow(
+            GitRepository(),
+            provider,
+        )
 
     if args.command == "docs":
         print("docs workflow not implemented")
