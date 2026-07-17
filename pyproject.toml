@@ -21,7 +21,8 @@ where = ["src"]
 [project.optional-dependencies]
 dev = [
     "pytest>=8.0",
-     "ruff>=0.8"
+     "ruff>=0.8",
+     "bandit[toml]>=1.7.9"
 ]
 
 [tool.ruff]
@@ -52,3 +53,12 @@ select = [
 [tool.pytest.ini_options]
 testpaths = ["tests"]
 pythonpath = ["src"]
+
+[tool.bandit]
+target = ["src"]
+exclude_dirs = [
+    "tests",
+    ".venv",
+    "build",
+    "dist"
+]
