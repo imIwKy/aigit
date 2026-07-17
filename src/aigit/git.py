@@ -1,6 +1,6 @@
 import shutil
-import subprocess # nosec B404 - required to invoke Git safely
-from subprocess import CompletedProcess # nosec B404 - required to invoke Git safely
+import subprocess  # nosec B404 - required to invoke Git safely
+from subprocess import CompletedProcess  # nosec B404 - required to invoke Git safely
 from typing import Protocol
 
 
