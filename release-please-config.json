@@ -1,0 +1,11 @@
+{
+  "release-type": "python",
+  "changelog-path": "CHANGELOG.md",
+  "include-v-in-tag": true,
+  "packages": {
+    ".": {
+      "package-name": "aigit",
+      "version-file": "pyproject.toml"
+    }
+  }
+}
