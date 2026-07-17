@@ -22,7 +22,8 @@ where = ["src"]
 dev = [
     "pytest>=8.0",
      "ruff>=0.8",
-     "bandit[toml]>=1.7.9"
+     "bandit[toml]>=1.7.9",
+     "pip-audit>=2.7"
 ]
 
 [tool.ruff]
