@@ -1,8 +1,20 @@
 from subprocess import CompletedProcess, run
+from typing import Protocol
 
 
 class GitError(RuntimeError):
     pass
+
+
+class GitRepositoryPort(Protocol):
+    def is_repository(self) -> bool:
+        ...
+
+    def staged_diff(self) -> str:
+        ...
+
+    def commit(self, message: str) -> None:
+        ...
 
 
 class GitRepository:
