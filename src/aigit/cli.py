@@ -4,7 +4,6 @@ from collections.abc import Sequence
 from aigit.config.environment import load_environment
 from aigit.config.loader import ConfigError, load_config
 from aigit.git import GitRepository
-from aigit.providers import FakeProvider
 from aigit.providers.factory import ProviderFactory
 from aigit.workflows.commit import run_commit_workflow
 
