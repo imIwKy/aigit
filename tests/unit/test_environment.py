@@ -17,9 +17,7 @@ def test_load_environment_reads_project_env_file(tmp_path, monkeypatch) -> None:
 
     load_environment(tmp_path)
 
-    assert get_required_environment_variable("TEST_AIGIT_SECRET") == (
-        "from-dotenv"
-    )
+    assert get_required_environment_variable("TEST_AIGIT_SECRET") == ("from-dotenv")
 
 
 def test_existing_environment_variable_takes_precedence(
@@ -36,9 +34,7 @@ def test_existing_environment_variable_takes_precedence(
 
     load_environment(tmp_path)
 
-    assert get_required_environment_variable("TEST_AIGIT_SECRET") == (
-        "from-shell"
-    )
+    assert get_required_environment_variable("TEST_AIGIT_SECRET") == ("from-shell")
 
 
 def test_missing_required_environment_variable_raises(monkeypatch) -> None:

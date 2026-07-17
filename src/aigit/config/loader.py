@@ -20,17 +20,11 @@ def load_config(project_root: Path | None = None) -> AppConfig:
         )
 
     try:
-        raw_config: dict[str, Any] = json.loads(
-            config_path.read_text(encoding="utf-8")
-        )
+        raw_config: dict[str, Any] = json.loads(config_path.read_text(encoding="utf-8"))
     except json.JSONDecodeError as error:
-        raise ConfigError(
-            f"Invalid JSON in {config_path}: {error}"
-        ) from error
+        raise ConfigError(f"Invalid JSON in {config_path}: {error}") from error
     except OSError as error:
-        raise ConfigError(
-            f"Unable to read {config_path}: {error}"
-        ) from error
+        raise ConfigError(f"Unable to read {config_path}: {error}") from error
 
     provider_values = raw_config.get("provider", {})
     commit_values = raw_config.get("commit", {})

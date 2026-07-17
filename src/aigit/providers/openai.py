@@ -53,24 +53,19 @@ class OpenAIProvider:
                 ],
             )
         except Exception as error:
-            raise OpenAIProviderError(
-                f"OpenAI request failed: {error}"
-            ) from error
+            raise OpenAIProviderError(f"OpenAI request failed: {error}") from error
 
         try:
             message = response.choices[0].message.content
         except (AttributeError, IndexError, TypeError) as error:
-            raise OpenAIProviderError(
-                "OpenAI returned an invalid response."
-            ) from error
+            raise OpenAIProviderError("OpenAI returned an invalid response.") from error
 
         if not message or not message.strip():
-            raise OpenAIProviderError(
-                "OpenAI returned an empty commit message."
-            )
+            raise OpenAIProviderError("OpenAI returned an empty commit message.")
 
         return clean_commit_message(message)
-    
+
+
 def clean_commit_message(message: str) -> str:
     cleaned = message.strip()
 
@@ -92,15 +87,11 @@ def clean_commit_message(message: str) -> str:
     # Remove triple quote wrappers.
     for quote in ("'''", '"""'):
         if cleaned.startswith(quote) and cleaned.endswith(quote):
-            cleaned = cleaned[len(quote):-len(quote)].strip()
+            cleaned = cleaned[len(quote) : -len(quote)].strip()
             break
 
     # Remove single quote wrappers around the entire message.
-    if (
-        len(cleaned) >= 2
-        and cleaned[0] == cleaned[-1]
-        and cleaned[0] in {"'", '"'}
-    ):
+    if len(cleaned) >= 2 and cleaned[0] == cleaned[-1] and cleaned[0] in {"'", '"'}:
         cleaned = cleaned[1:-1].strip()
 
     return cleaned

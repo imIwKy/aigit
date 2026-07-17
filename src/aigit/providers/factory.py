@@ -17,6 +17,4 @@ class ProviderFactory:
         if definition.protocol == "openai":
             return OpenAIProvider(config, definition)
 
-        raise ValueError(
-            f"Unsupported provider protocol: {definition.protocol}"
-        )
+        raise ValueError(f"Unsupported provider protocol: {definition.protocol}")

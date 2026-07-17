@@ -43,9 +43,7 @@ def test_factory_creates_fake_provider() -> None:
     provider = ProviderFactory().create(config)
 
     assert isinstance(provider, FakeProvider)
-    assert provider.generate_commit_message("some diff") == (
-        "feat: created by factory"
-    )
+    assert provider.generate_commit_message("some diff") == ("feat: created by factory")
 
 
 def test_factory_rejects_unknown_provider() -> None:

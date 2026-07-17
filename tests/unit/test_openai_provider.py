@@ -66,9 +66,7 @@ def make_provider(
 
 
 def test_generates_commit_message(monkeypatch) -> None:
-    completions = FakeCompletions(
-        response=make_response("feat: add provider support")
-    )
+    completions = FakeCompletions(response=make_response("feat: add provider support"))
     provider = make_provider(monkeypatch, completions)
 
     result = provider.generate_commit_message("diff --git ...")
@@ -77,9 +75,7 @@ def test_generates_commit_message(monkeypatch) -> None:
 
 
 def test_sends_expected_request(monkeypatch) -> None:
-    completions = FakeCompletions(
-        response=make_response("feat: add provider support")
-    )
+    completions = FakeCompletions(response=make_response("feat: add provider support"))
     provider = make_provider(monkeypatch, completions)
 
     diff = "diff --git a/example.txt b/example.txt"
@@ -102,9 +98,7 @@ def test_sends_expected_request(monkeypatch) -> None:
 
 
 def test_uses_definition_default_model(monkeypatch) -> None:
-    completions = FakeCompletions(
-        response=make_response("chore: update files")
-    )
+    completions = FakeCompletions(response=make_response("chore: update files"))
     provider = make_provider(
         monkeypatch,
         completions,
@@ -160,9 +154,7 @@ def test_requires_api_key(monkeypatch) -> None:
         model="gpt-4o-mini",
     )
 
-    completions = FakeCompletions(
-        response=make_response("feat: add provider support")
-    )
+    completions = FakeCompletions(response=make_response("feat: add provider support"))
     client = FakeOpenAIClient(completions)
 
     with pytest.raises(
@@ -175,6 +167,7 @@ def test_requires_api_key(monkeypatch) -> None:
             client=client,
         )
 
+
 def test_removes_markdown_code_fences() -> None:
     message = """```text
 feat: add provider support
@@ -182,25 +175,20 @@ feat: add provider support
 ```"""
 
     assert clean_commit_message(message) == (
-        "feat: add provider support\n"
-        "- Add OpenAI provider"
+        "feat: add provider support\n- Add OpenAI provider"
     )
 
 
 def test_removes_triple_single_quotes() -> None:
     message = "'''feat: add provider support'''"
 
-    assert clean_commit_message(message) == (
-        "feat: add provider support"
-    )
+    assert clean_commit_message(message) == ("feat: add provider support")
 
 
 def test_removes_double_quotes() -> None:
     message = '"feat: add provider support"'
 
-    assert clean_commit_message(message) == (
-        "feat: add provider support"
-    )
+    assert clean_commit_message(message) == ("feat: add provider support")
 
 
 def test_preserves_normal_commit_message() -> None:
