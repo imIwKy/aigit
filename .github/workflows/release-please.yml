@@ -21,3 +21,24 @@ jobs:
           target-branch: stable
           config-file: release-please-config.json
           manifest-file: .release-please-manifest.json
+
+      - name: Enable auto-merge for release pull request
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          pr_number="$(gh pr list \
+            --base stable \
+            --head release-please--branches--stable \
+            --state open \
+            --label "autorelease: pending" \
+            --json number \
+            --jq '.[0].number')"
+
+          if [ -n "$pr_number" ]; then
+            gh pr merge "$pr_number" \
+              --auto \
+              --squash \
+              --delete-branch=false
+          else
+            echo "No pending Release Please PR found."
+          fi
