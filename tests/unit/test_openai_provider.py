@@ -7,6 +7,7 @@ from aigit.providers.definitions import PROVIDER_DEFINITIONS
 from aigit.providers.openai import (
     OpenAIProvider,
     OpenAIProviderError,
+    clean_commit_message,
 )
 
 
@@ -181,3 +182,38 @@ def test_requires_api_key(monkeypatch) -> None:
             definition=PROVIDER_DEFINITIONS["openai"],
             client=client,
         )
+
+def test_removes_markdown_code_fences() -> None:
+    message = """```text
+feat: add provider support
+- Add OpenAI provider
+```"""
+
+    assert clean_commit_message(message) == (
+        "feat: add provider support\n"
+        "- Add OpenAI provider"
+    )
+
+
+def test_removes_triple_single_quotes() -> None:
+    message = "'''feat: add provider support'''"
+
+    assert clean_commit_message(message) == (
+        "feat: add provider support"
+    )
+
+
+def test_removes_double_quotes() -> None:
+    message = '"feat: add provider support"'
+
+    assert clean_commit_message(message) == (
+        "feat: add provider support"
+    )
+
+
+def test_preserves_normal_commit_message() -> None:
+    message = """feat: add provider support
+- Add API integration
+- Add provider tests"""
+
+    assert clean_commit_message(message) == message

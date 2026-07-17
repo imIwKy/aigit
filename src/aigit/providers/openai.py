@@ -77,4 +77,38 @@ class OpenAIProvider:
                 "OpenAI returned an empty commit message."
             )
 
-        return message.strip()
+        return clean_commit_message(message)
+    
+def clean_commit_message(message: str) -> str:
+    cleaned = message.strip()
+
+    # Remove Markdown code fences:
+    # ```text
+    # feat: example
+    # ```
+    if cleaned.startswith("```") and cleaned.endswith("```"):
+        lines = cleaned.splitlines()
+
+        if lines:
+            lines = lines[1:]
+
+        if lines and lines[-1].strip() == "```":
+            lines = lines[:-1]
+
+        cleaned = "\n".join(lines).strip()
+
+    # Remove triple quote wrappers.
+    for quote in ("'''", '"""'):
+        if cleaned.startswith(quote) and cleaned.endswith(quote):
+            cleaned = cleaned[len(quote):-len(quote)].strip()
+            break
+
+    # Remove single quote wrappers around the entire message.
+    if (
+        len(cleaned) >= 2
+        and cleaned[0] == cleaned[-1]
+        and cleaned[0] in {"'", '"'}
+    ):
+        cleaned = cleaned[1:-1].strip()
+
+    return cleaned
