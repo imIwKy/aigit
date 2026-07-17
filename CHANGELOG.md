@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.3.0](https://github.com/imIwKy/aigit/compare/aigit-v0.2.0...aigit-v0.3.0) (2026-07-17)
+
+
+### Features
+
+* add auto-merge for release pull requests in workflow ([#6](https://github.com/imIwKy/aigit/issues/6)) ([42635cf](https://github.com/imIwKy/aigit/commit/42635cf416689e08e5c28fa4afddf19bb3e018f4))
+
 ## [0.2.0](https://github.com/imIwKy/aigit/compare/aigit-v0.1.0...aigit-v0.2.0) (2026-07-17)
 
 
