@@ -54,22 +54,30 @@ def load_bandit_findings(path: Path) -> list[Finding]:
 
 def load_pip_audit_findings(path: Path) -> list[Finding]:
     data = json.loads(path.read_text(encoding="utf-8"))
+
+    if isinstance(data, dict):
+        packages = data.get("dependencies", [])
+    elif isinstance(data, list):
+        # Supports older or alternate pip-audit output formats.
+        packages = data
+    else:
+        packages = []
+
     findings: list[Finding] = []
 
-    for package in data:
+    for package in packages:
+        if not isinstance(package, dict):
+            continue
+
         package_name = package.get("name", "Unknown")
         package_version = package.get("version", "Unknown")
 
         for vulnerability in package.get("vulns", []):
+            if not isinstance(vulnerability, dict):
+                continue
+
             aliases = vulnerability.get("aliases", [])
-            identifier = (
-                aliases[0]
-                if aliases
-                else vulnerability.get(
-                    "id",
-                    "Unknown",
-                )
-            )
+            identifier = aliases[0] if aliases else vulnerability.get("id", "Unknown")
 
             fix_versions = vulnerability.get("fix_versions", [])
 

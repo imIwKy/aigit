@@ -53,7 +53,10 @@ select = [
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
-pythonpath = ["src"]
+pythonpath = [
+    "src",
+    "."
+]
 
 [tool.bandit]
 target = ["src"]
