@@ -25,8 +25,12 @@ jobs:
       - name: Enable auto-merge for release pull request
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GH_REPO: ${{ github.repository }}
         run: |
+          set -euo pipefail
+
           pr_number="$(gh pr list \
+            --repo "$GH_REPO" \
             --base stable \
             --head release-please--branches--stable \
             --state open \
@@ -36,6 +40,7 @@ jobs:
 
           if [ -n "$pr_number" ]; then
             gh pr merge "$pr_number" \
+              --repo "$GH_REPO" \
               --auto \
               --squash \
               --delete-branch=false
