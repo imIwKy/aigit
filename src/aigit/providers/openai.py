@@ -48,15 +48,7 @@ class OpenAIProvider:
                     },
                     {
                         "role": "user",
-                        "content": (
-                            "Generate a Conventional Commit message based on "
-                            "this staged Git diff.\n\n"
-                            "Rules:\n"
-                            "- Keep the title under 72 characters.\n"
-                            "- Do not invent changes.\n"
-                            "- Include body bullets only if useful.\n\n"
-                            f"Git diff:\n{diff}"
-                        ),
+                        "content": f"Staged Git diff:\n{diff}",
                     },
                 ],
             )
