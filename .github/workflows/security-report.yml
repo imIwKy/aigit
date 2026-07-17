@@ -1,0 +1,115 @@
+name: Security Report
+
+on:
+  pull_request:
+    types:
+      - opened
+      - synchronize
+      - reopened
+
+permissions:
+  contents: read
+  pull-requests: write
+
+jobs:
+  security:
+    name: Generate security report
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: pip
+
+      - name: Install project dependencies
+        run: python -m pip install .
+
+      - name: Install security tools
+        run: |
+          python -m pip install \
+            "bandit[toml]>=1.7.9" \
+            "pip-audit>=2.7"
+
+      - name: Run Bandit
+        shell: bash
+        run: |
+          bandit_exit=0
+
+          bandit \
+            -r src \
+            -c pyproject.toml \
+            -f json \
+            -o bandit-report.json \
+            || bandit_exit=$?
+
+          printf "%s" "$bandit_exit" > bandit-exit-code.txt
+
+          if [ ! -f bandit-report.json ]; then
+            printf '{"results": []}' > bandit-report.json
+          fi
+
+      - name: Run pip-audit
+        shell: bash
+        run: |
+          pip_audit_exit=0
+
+          pip-audit \
+            --format json \
+            --output pip-audit-report.json \
+            || pip_audit_exit=$?
+
+          printf "%s" "$pip_audit_exit" > pip-audit-exit-code.txt
+
+          if [ ! -f pip-audit-report.json ]; then
+            printf '[]' > pip-audit-report.json
+          fi
+
+      - name: Generate combined security report
+        run: |
+          python scripts/security_report.py \
+            --bandit bandit-report.json \
+            --pip-audit pip-audit-report.json \
+            --output security-report.md
+
+      - name: Upload security reports
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: security-report
+          path: |
+            bandit-report.json
+            pip-audit-report.json
+            security-report.md
+
+      - name: Comment security report on pull request
+        uses: marocchino/sticky-pull-request-comment@v2
+        with:
+          header: aigit-security-report
+          path: security-report.md
+
+      - name: Fail if security issues were found
+        shell: bash
+        run: |
+          bandit_exit="$(cat bandit-exit-code.txt)"
+          pip_audit_exit="$(cat pip-audit-exit-code.txt)"
+
+          if [ "$bandit_exit" -ne 0 ] || [ "$pip_audit_exit" -ne 0 ]; then
+            echo "Security findings detected."
+
+            if [ "$bandit_exit" -ne 0 ]; then
+              echo "Bandit reported findings."
+            fi
+
+            if [ "$pip_audit_exit" -ne 0 ]; then
+              echo "pip-audit reported vulnerabilities."
+            fi
+
+            exit 1
+          fi
+
+          echo "No security findings detected."
