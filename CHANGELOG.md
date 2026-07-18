@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.3.1](https://github.com/imIwKy/aigit/compare/aigit-v0.3.0...aigit-v0.3.1) (2026-07-18)
+
+
+### Documentation
+
+* update README with detailed usage and features ([#17](https://github.com/imIwKy/aigit/issues/17)) ([9bbe395](https://github.com/imIwKy/aigit/commit/9bbe395aee6adaf344f390b1af77525b1609a79a))
+
 ## [0.3.0](https://github.com/imIwKy/aigit/compare/aigit-v0.2.0...aigit-v0.3.0) (2026-07-17)
 
 
