@@ -45,7 +45,7 @@ AI suggests changes, but the developer remains in control. aigit never creates a
 Clone the repository:
 
 ```bash
-git clone https://github.com/<owner>/aigit.git
+git clone https://github.com/imIwKy/aigit.git
 cd aigit
 ```
 
