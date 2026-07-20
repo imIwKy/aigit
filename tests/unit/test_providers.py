@@ -2,9 +2,34 @@ import pytest
 
 from aigit.config.models import ProviderConfig
 from aigit.providers import FakeProvider, LlmProvider
-from aigit.providers.definitions import PROVIDER_DEFINITIONS
+from aigit.providers.definitions import (
+    FAKE_PROVIDER_DEFINITION,
+    ProviderDefinition,
+)
 from aigit.providers.factory import ProviderFactory
-from aigit.providers.openai import OpenAIProvider
+from aigit.providers.openai_compatible import (
+    OpenAICompatibleProvider,
+)
+from aigit.providers.registry import ProviderRegistry, ProviderRegistryError
+
+OPENAI_DEFINITION = ProviderDefinition(
+    name="openai",
+    display_name="OpenAI",
+    protocol="openai-compatible",
+    base_url="https://api.openai.com/v1",
+    api_key_environment_variable="OPENAI_API_KEY",
+    default_model="gpt-4o-mini",
+)
+
+
+def make_registry() -> ProviderRegistry:
+    return ProviderRegistry(
+        definitions={
+            "fake": FAKE_PROVIDER_DEFINITION,
+            "openai": OPENAI_DEFINITION,
+        },
+        default="openai",
+    )
 
 
 def test_fake_provider_uses_configured_message() -> None:
@@ -26,7 +51,7 @@ def test_fake_provider_matches_provider_interface() -> None:
 
 
 def test_fake_provider_definition_exists() -> None:
-    definition = PROVIDER_DEFINITIONS["fake"]
+    definition = FAKE_PROVIDER_DEFINITION
 
     assert definition.name == "fake"
     assert definition.protocol == "fake"
@@ -40,7 +65,9 @@ def test_factory_creates_fake_provider() -> None:
         fake_message="feat: created by factory",
     )
 
-    provider = ProviderFactory().create(config)
+    provider = ProviderFactory(
+        registry=make_registry(),
+    ).create(config)
 
     assert isinstance(provider, FakeProvider)
     assert provider.generate_commit_message("some diff") == ("feat: created by factory")
@@ -49,11 +76,18 @@ def test_factory_creates_fake_provider() -> None:
 def test_factory_rejects_unknown_provider() -> None:
     config = ProviderConfig(name="does-not-exist")
 
-    with pytest.raises(ValueError, match="Unknown provider"):
-        ProviderFactory().create(config)
+    with pytest.raises(
+        ProviderRegistryError,
+        match="not found",
+    ):
+        ProviderFactory(
+            registry=make_registry(),
+        ).create(config)
 
 
-def test_factory_creates_openai_provider(monkeypatch) -> None:
+def test_factory_creates_openai_compatible_provider(
+    monkeypatch,
+) -> None:
     monkeypatch.setenv("OPENAI_API_KEY", "test-key")
 
     config = ProviderConfig(
@@ -61,6 +95,8 @@ def test_factory_creates_openai_provider(monkeypatch) -> None:
         model="gpt-4o-mini",
     )
 
-    provider = ProviderFactory().create(config)
+    provider = ProviderFactory(
+        registry=make_registry(),
+    ).create(config)
 
-    assert isinstance(provider, OpenAIProvider)
+    assert isinstance(provider, OpenAICompatibleProvider)

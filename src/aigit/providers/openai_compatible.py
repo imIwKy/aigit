@@ -11,7 +11,7 @@ class OpenAIProviderError(RuntimeError):
     pass
 
 
-class OpenAIProvider:
+class OpenAICompatibleProvider:
     def __init__(
         self,
         config: ProviderConfig,
@@ -22,15 +22,13 @@ class OpenAIProvider:
         self.definition = definition
 
         api_key_name = definition.api_key_environment_variable
+        api_key = None
 
-        if not api_key_name:
-            raise OpenAIProviderError(
-                "OpenAI provider has no API key environment variable configured."
-            )
-
-        api_key = get_required_environment_variable(api_key_name)
+        if api_key_name:
+            api_key = get_required_environment_variable(api_key_name)
 
         self.model = config.model or definition.default_model
+
         self.client = client or OpenAI(
             api_key=api_key,
             base_url=definition.base_url,
@@ -95,3 +93,6 @@ def clean_commit_message(message: str) -> str:
         cleaned = cleaned[1:-1].strip()
 
     return cleaned
+
+
+OpenAIProvider = OpenAICompatibleProvider

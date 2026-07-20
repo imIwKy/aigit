@@ -5,6 +5,7 @@ from aigit.config.environment import load_environment
 from aigit.config.loader import ConfigError, load_config
 from aigit.git import GitRepository
 from aigit.providers.factory import ProviderFactory
+from aigit.providers.loader import ProviderDefinitionError
 from aigit.workflows.commit import run_commit_workflow
 
 
@@ -56,6 +57,9 @@ def run_command(args: argparse.Namespace) -> int:
     if args.command == "commit":
         try:
             provider = ProviderFactory().create(config.provider)
+        except ProviderDefinitionError as error:
+            print(f"Provider configuration error: {error}")
+            return 1
         except Exception as error:
             print(f"Provider error: {error}")
             return 1

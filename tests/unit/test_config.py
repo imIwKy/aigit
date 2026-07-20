@@ -10,7 +10,7 @@ from aigit.providers import FakeProvider
 def test_load_config_returns_defaults_when_file_is_missing(tmp_path) -> None:
     config = load_config(tmp_path)
 
-    assert config.provider.name == "fake"
+    assert config.provider.name is None
     assert config.provider.model is None
     assert config.provider.temperature == 0.2
     assert config.commit.max_title_length == 72
@@ -68,7 +68,7 @@ def test_load_config_uses_defaults_for_missing_values(tmp_path) -> None:
     config = load_config(tmp_path)
 
     assert config.provider.model == "partial-model"
-    assert config.provider.name == "fake"
+    assert config.provider.name is None
     assert config.provider.temperature == 0.2
     assert config.commit.max_title_length == 72
 

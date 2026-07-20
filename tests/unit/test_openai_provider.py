@@ -3,16 +3,29 @@ from types import SimpleNamespace
 import pytest
 
 from aigit.config.models import ProviderConfig
-from aigit.providers.definitions import PROVIDER_DEFINITIONS
-from aigit.providers.openai import (
-    OpenAIProvider,
+from aigit.providers.definitions import ProviderDefinition
+from aigit.providers.openai_compatible import (
+    OpenAICompatibleProvider,
     OpenAIProviderError,
     clean_commit_message,
 )
 
+OPENAI_DEFINITION = ProviderDefinition(
+    name="openai",
+    display_name="OpenAI",
+    protocol="openai-compatible",
+    base_url="https://api.openai.com/v1",
+    api_key_environment_variable="OPENAI_API_KEY",
+    default_model="gpt-4o-mini",
+)
+
 
 class FakeCompletions:
-    def __init__(self, response=None, error: Exception | None = None) -> None:
+    def __init__(
+        self,
+        response=None,
+        error: Exception | None = None,
+    ) -> None:
         self.response = response
         self.error = error
         self.create_arguments: dict[str, object] | None = None
@@ -28,7 +41,9 @@ class FakeCompletions:
 
 class FakeOpenAIClient:
     def __init__(self, completions: FakeCompletions) -> None:
-        self.chat = SimpleNamespace(completions=completions)
+        self.chat = SimpleNamespace(
+            completions=completions,
+        )
 
 
 def make_response(message: str | None):
@@ -46,7 +61,7 @@ def make_provider(
     completions: FakeCompletions,
     *,
     config: ProviderConfig | None = None,
-) -> OpenAIProvider:
+) -> OpenAICompatibleProvider:
     monkeypatch.setenv("OPENAI_API_KEY", "test-key")
 
     provider_config = config or ProviderConfig(
@@ -58,15 +73,17 @@ def make_provider(
 
     client = FakeOpenAIClient(completions)
 
-    return OpenAIProvider(
+    return OpenAICompatibleProvider(
         config=provider_config,
-        definition=PROVIDER_DEFINITIONS["openai"],
+        definition=OPENAI_DEFINITION,
         client=client,
     )
 
 
 def test_generates_commit_message(monkeypatch) -> None:
-    completions = FakeCompletions(response=make_response("feat: add provider support"))
+    completions = FakeCompletions(
+        response=make_response("feat: add provider support"),
+    )
     provider = make_provider(monkeypatch, completions)
 
     result = provider.generate_commit_message("diff --git ...")
@@ -75,7 +92,9 @@ def test_generates_commit_message(monkeypatch) -> None:
 
 
 def test_sends_expected_request(monkeypatch) -> None:
-    completions = FakeCompletions(response=make_response("feat: add provider support"))
+    completions = FakeCompletions(
+        response=make_response("feat: add provider support"),
+    )
     provider = make_provider(monkeypatch, completions)
 
     diff = "diff --git a/example.txt b/example.txt"
@@ -98,11 +117,16 @@ def test_sends_expected_request(monkeypatch) -> None:
 
 
 def test_uses_definition_default_model(monkeypatch) -> None:
-    completions = FakeCompletions(response=make_response("chore: update files"))
+    completions = FakeCompletions(
+        response=make_response("chore: update files"),
+    )
     provider = make_provider(
         monkeypatch,
         completions,
-        config=ProviderConfig(name="openai", model=None),
+        config=ProviderConfig(
+            name="openai",
+            model=None,
+        ),
     )
 
     provider.generate_commit_message("some diff")
@@ -112,7 +136,9 @@ def test_uses_definition_default_model(monkeypatch) -> None:
 
 
 def test_rejects_empty_response(monkeypatch) -> None:
-    completions = FakeCompletions(response=make_response(""))
+    completions = FakeCompletions(
+        response=make_response(""),
+    )
     provider = make_provider(monkeypatch, completions)
 
     with pytest.raises(
@@ -123,7 +149,9 @@ def test_rejects_empty_response(monkeypatch) -> None:
 
 
 def test_rejects_invalid_response(monkeypatch) -> None:
-    completions = FakeCompletions(response=SimpleNamespace(choices=[]))
+    completions = FakeCompletions(
+        response=SimpleNamespace(choices=[]),
+    )
     provider = make_provider(monkeypatch, completions)
 
     with pytest.raises(
@@ -154,16 +182,18 @@ def test_requires_api_key(monkeypatch) -> None:
         model="gpt-4o-mini",
     )
 
-    completions = FakeCompletions(response=make_response("feat: add provider support"))
+    completions = FakeCompletions(
+        response=make_response("feat: add provider support"),
+    )
     client = FakeOpenAIClient(completions)
 
     with pytest.raises(
         RuntimeError,
         match="Required environment variable is not set",
     ):
-        OpenAIProvider(
+        OpenAICompatibleProvider(
             config=config,
-            definition=PROVIDER_DEFINITIONS["openai"],
+            definition=OPENAI_DEFINITION,
             client=client,
         )
 

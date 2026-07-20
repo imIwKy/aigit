@@ -3,12 +3,10 @@ from dataclasses import dataclass
 
 @dataclass(frozen=True)
 class ProviderConfig:
-    name: str = "fake"
+    name: str | None = None
     model: str | None = None
     system_prompt: str = (
-        "Generate a Conventional Commit message from the provided Git diff. "
-        "Return only the commit message. "
-        "Do not wrap it in quotes or Markdown code fences."
+        "Generate a concise Conventional Commit message from the staged Git diff."
     )
     temperature: float = 0.2
     fake_message: str = "chore: update files"
