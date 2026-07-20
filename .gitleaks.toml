@@ -1,0 +1,18 @@
+title = "aigit Gitleaks Configuration"
+
+[extend]
+useDefault = true
+
+[allowlist]
+description = "Allowed non-secret files and test values"
+
+paths = [
+    '''^\.env\.example$''',
+    '''^tests/fixtures/'''
+]
+
+regexes = [
+    '''your-api-key''',
+    '''replace-me''',
+    '''test-key'''
+]
