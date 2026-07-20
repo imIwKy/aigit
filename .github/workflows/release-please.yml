@@ -17,14 +17,14 @@ jobs:
       - name: Create or update release pull request
         uses: googleapis/release-please-action@v4
         with:
-          token: ${{ secrets.GITHUB_TOKEN }}
+          token: ${{ secrets.RELEASE_PLEASE_TOKEN }}
           target-branch: stable
           config-file: release-please-config.json
           manifest-file: .release-please-manifest.json
 
       - name: Enable auto-merge for release pull request
         env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GH_TOKEN: ${{ secrets.RELEASE_PLEASE_TOKEN }}
           GH_REPO: ${{ github.repository }}
         run: |
           set -euo pipefail
