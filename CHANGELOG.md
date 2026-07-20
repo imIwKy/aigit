@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.4.0](https://github.com/imIwKy/aigit/compare/aigit-v0.3.2...aigit-v0.4.0) (2026-07-20)
+
+
+### Features
+
+* **git:** add Gitleaks workflow for secret scanning and configuration ([#21](https://github.com/imIwKy/aigit/issues/21)) ([6acec51](https://github.com/imIwKy/aigit/commit/6acec51da49591377c9ffbf60fb3c0516ae823d5))
+
 ## [0.3.2](https://github.com/imIwKy/aigit/compare/aigit-v0.3.1...aigit-v0.3.2) (2026-07-20)
 
 
