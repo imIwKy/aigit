@@ -31,7 +31,7 @@ def load_config(project_root: Path | None = None) -> AppConfig:
 
     return AppConfig(
         provider=ProviderConfig(
-            name=provider_values.get("name", "fake"),
+            name=provider_values.get("name"),
             model=provider_values.get("model"),
             system_prompt=provider_values.get(
                 "system_prompt",
