@@ -29,9 +29,12 @@ def load_config(project_root: Path | None = None) -> AppConfig:
     provider_values = raw_config.get("provider", {})
     commit_values = raw_config.get("commit", {})
 
+    configured_provider_name = provider_values.get("name")
+    command_provider_name = commit_values.get("provider")
+
     return AppConfig(
         provider=ProviderConfig(
-            name=provider_values.get("name"),
+            name=command_provider_name or configured_provider_name,
             model=provider_values.get("model"),
             system_prompt=provider_values.get(
                 "system_prompt",
@@ -44,6 +47,7 @@ def load_config(project_root: Path | None = None) -> AppConfig:
             ),
         ),
         commit=CommitConfig(
+            provider=command_provider_name,
             max_title_length=commit_values.get("max_title_length", 72),
         ),
     )
