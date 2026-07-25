@@ -1,5 +1,5 @@
 {
-  "default": "openai",
+  "default": "llama-local",
   "providers": {
     "openai": {
       "display_name": "OpenAI",
@@ -8,12 +8,12 @@
       "api_key_environment_variable": "OPENAI_API_KEY",
       "default_model": "gpt-4o-mini"
     },
-    "local": {
-      "display_name": "Local Ollama",
+    "llama-local": {
+      "display_name": "Local Llama server",
       "protocol": "openai-compatible",
-      "base_url": "http://localhost:11434/v1",
+      "base_url": "http://127.0.0.1:8080/v1",
       "api_key_environment_variable": null,
-      "default_model": "llama3.1"
+      "default_model": "llama-local"
     }
   }
 }
