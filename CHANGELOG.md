@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.6.0](https://github.com/imIwKy/aigit/compare/aigit-v0.5.0...aigit-v0.6.0) (2026-07-26)
+
+
+### Features
+
+* **aigit:** add detailed logging and debug options ([#27](https://github.com/imIwKy/aigit/issues/27)) ([5b8c40e](https://github.com/imIwKy/aigit/commit/5b8c40e6bdd8d144595a28bef4935ed7ee8fd651))
+
 ## [0.5.0](https://github.com/imIwKy/aigit/compare/aigit-v0.4.0...aigit-v0.5.0) (2026-07-26)
 
 
