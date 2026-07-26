@@ -1,3 +1,4 @@
+import logging
 from typing import Any
 
 from openai import OpenAI
@@ -9,6 +10,9 @@ from aigit.providers.definitions import ProviderDefinition
 
 class OpenAIProviderError(RuntimeError):
     pass
+
+
+logger = logging.getLogger(__name__)
 
 
 class OpenAICompatibleProvider:
@@ -35,6 +39,14 @@ class OpenAICompatibleProvider:
         )
 
     def generate_commit_message(self, diff: str) -> str:
+        logger.debug(
+            "Sending staged diff to provider '%s' using model '%s' "
+            "(diff length: %d characters)",
+            self.definition.name,
+            self.model,
+            len(diff),
+        )
+
         try:
             response = self.client.chat.completions.create(
                 model=self.model,
@@ -51,6 +63,7 @@ class OpenAICompatibleProvider:
                 ],
             )
         except Exception as error:
+            logger.debug("Provider request failed", exc_info=True)
             raise OpenAIProviderError(f"OpenAI request failed: {error}") from error
 
         try:
@@ -61,6 +74,7 @@ class OpenAICompatibleProvider:
         if not message or not message.strip():
             raise OpenAIProviderError("OpenAI returned an empty commit message.")
 
+        logger.debug("Provider returned a commit message")
         return clean_commit_message(message)
 
 

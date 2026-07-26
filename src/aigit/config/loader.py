@@ -1,4 +1,5 @@
 import json
+import logging
 from pathlib import Path
 from typing import Any
 
@@ -9,11 +10,17 @@ class ConfigError(RuntimeError):
     pass
 
 
+logger = logging.getLogger(__name__)
+
+
 def load_config(project_root: Path | None = None) -> AppConfig:
     root = project_root or Path.cwd()
     config_path = root / ".aigit" / "config.json"
 
+    logger.debug("Loading configuration from %s", config_path)
+
     if not config_path.exists():
+        logger.debug("Configuration file not found; using defaults")
         return AppConfig(
             provider=ProviderConfig(),
             commit=CommitConfig(),
@@ -31,6 +38,12 @@ def load_config(project_root: Path | None = None) -> AppConfig:
 
     configured_provider_name = provider_values.get("name")
     command_provider_name = commit_values.get("provider")
+
+    logger.debug(
+        "Loaded configuration: provider=%s, commit_provider=%s",
+        configured_provider_name or "<automatic selection>",
+        command_provider_name or "<not specified>",
+    )
 
     return AppConfig(
         provider=ProviderConfig(
