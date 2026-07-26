@@ -1,3 +1,4 @@
+import logging
 from dataclasses import dataclass
 
 from aigit.providers.definitions import ProviderDefinition
@@ -5,6 +6,9 @@ from aigit.providers.definitions import ProviderDefinition
 
 class ProviderRegistryError(RuntimeError):
     pass
+
+
+logger = logging.getLogger(__name__)
 
 
 @dataclass(frozen=True)
@@ -22,9 +26,11 @@ class ProviderRegistry:
 
     def select(self, requested_name: str | None) -> ProviderDefinition:
         if requested_name:
+            logger.debug("Selecting explicitly requested provider: %s", requested_name)
             return self.get(requested_name)
 
         if self.default:
+            logger.debug("Selecting registry default provider: %s", self.default)
             return self.get(self.default)
 
         non_fake = [

@@ -1,7 +1,10 @@
+import logging
 import os
 from pathlib import Path
 
 from dotenv import load_dotenv
+
+logger = logging.getLogger(__name__)
 
 
 def load_environment(project_root: Path | None = None) -> None:
@@ -10,10 +13,10 @@ def load_environment(project_root: Path | None = None) -> None:
     global_env_path = Path.home() / ".config" / "aigit" / ".env"
     project_env_path = root / ".env"
 
-    # Load global secrets first.
+    logger.debug("Loading global environment file: %s", global_env_path)
     load_dotenv(global_env_path)
 
-    # Load project values only when they are not already defined globally.
+    logger.debug("Loading project environment file: %s", project_env_path)
     load_dotenv(project_env_path)
 
 

@@ -65,6 +65,7 @@ def test_commit_fails_without_staged_changes(capsys) -> None:
 
     assert result == 1
     assert repository.committed_messages == []
+    assert provider.received_diff is None
     assert "No staged changes found." in capsys.readouterr().out
 
 
