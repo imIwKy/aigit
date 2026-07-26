@@ -14,6 +14,7 @@ class ProviderConfig:
 
 @dataclass(frozen=True)
 class CommitConfig:
+    provider: str | None = None
     max_title_length: int = 72
 
 
