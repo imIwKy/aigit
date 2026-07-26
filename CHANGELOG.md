@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.5.0](https://github.com/imIwKy/aigit/compare/aigit-v0.4.0...aigit-v0.5.0) (2026-07-26)
+
+
+### Features
+
+* **config:** Added local provider definitions ([#25](https://github.com/imIwKy/aigit/issues/25)) ([1d2feb3](https://github.com/imIwKy/aigit/commit/1d2feb3cdd97007a9cf80d00ea5c2169c7dba853))
+
 ## [0.4.0](https://github.com/imIwKy/aigit/compare/aigit-v0.3.2...aigit-v0.4.0) (2026-07-20)
 
 
