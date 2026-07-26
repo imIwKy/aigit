@@ -26,9 +26,16 @@ def run_commit_workflow(
 
     logger.debug("Read staged diff containing %d characters", len(diff))
 
+    if not diff.strip():
+        logger.debug("No staged changes found")
+        print("No staged changes found.")
+        print("Stage changes with: git add <files>")
+        return 1
+
     try:
         message = provider.generate_commit_message(diff).strip()
     except Exception as error:
+        logger.debug("Provider failed to generate a commit message", exc_info=True)
         print(f"Error generating commit message: {error}")
         return 1
 
@@ -48,11 +55,10 @@ def run_commit_workflow(
         print("Commit cancelled.")
         return 0
 
-    logger.debug("User approved commit")
-
     try:
         repository.commit(message)
     except GitError as error:
+        logger.debug("Git commit failed", exc_info=True)
         print(f"Error creating commit: {error}")
         return 1
 
