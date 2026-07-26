@@ -22,7 +22,11 @@ class OpenAICompatibleProvider:
         self.definition = definition
 
         api_key_name = definition.api_key_environment_variable
+<<<<<<< HEAD
         api_key = "local"
+=======
+        api_key = None
+>>>>>>> stable
 
         if api_key_name:
             api_key = get_required_environment_variable(api_key_name)

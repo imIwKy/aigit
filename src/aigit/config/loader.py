@@ -34,7 +34,11 @@ def load_config(project_root: Path | None = None) -> AppConfig:
 
     return AppConfig(
         provider=ProviderConfig(
+<<<<<<< HEAD
             name=command_provider_name or configured_provider_name,
+=======
+            name=provider_values.get("name"),
+>>>>>>> stable
             model=provider_values.get("model"),
             system_prompt=provider_values.get(
                 "system_prompt",
