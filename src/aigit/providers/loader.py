@@ -73,10 +73,10 @@ def _build_definition(
 
     protocol = values["protocol"]
 
-    if protocol not in {"openai-compatible", "fake"}:
+    if protocol not in {"openai-compatible", "anthropic", "fake"}:
         raise ProviderDefinitionError(
             f"Unsupported provider protocol '{protocol}'. "
-            "Supported protocols: openai-compatible, fake."
+            "Supported protocols: openai-compatible, anthropic, fake."
         )
 
     return ProviderDefinition(

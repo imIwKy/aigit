@@ -1,6 +1,7 @@
 import logging
 
 from aigit.config.models import ProviderConfig
+from aigit.providers.anthropic import AnthropicProvider
 from aigit.providers.fake import FakeProvider
 from aigit.providers.loader import load_provider_registry
 from aigit.providers.openai_compatible import (
@@ -38,5 +39,12 @@ class ProviderFactory:
                 config.model or definition.default_model,
             )
             return OpenAICompatibleProvider(config, definition)
+
+        if definition.protocol == "anthropic":
+            logger.debug(
+                "Creating Anthropic provider with model=%s",
+                config.model or definition.default_model,
+            )
+            return AnthropicProvider(config, definition)
 
         raise ValueError(f"Unsupported provider protocol: {definition.protocol}")
