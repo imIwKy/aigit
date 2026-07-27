@@ -161,11 +161,19 @@ Without `--debug`, only warnings and errors are shown.
 
 # Configuration
 
-Project configuration is stored in:
+Project-specific aigit configuration is stored in the `.aigit/` directory:
 
 ```text
-.aigit/config.json
+.aigit/
+├── config.json
+└── providers.json
 ```
+
+Create this directory in each project where aigit is used.
+
+- `.aigit/config.json` configures provider usage and command behavior.
+- `.aigit/providers.json` defines the providers available to the project.
+
 
 Example:
 
@@ -197,7 +205,7 @@ Configuration options:
 
 If `.aigit/config.json` is missing, aigit runs with defaults (no provider selected by name, `temperature` `0.2`, `max_title_length` `72`).
 
-Provider *implementations* (their protocol, base URL, default model, and API key variable) are defined separately, in `.aigit/providers.json` — see [Providers](#providers) below.
+Provider definitions (their protocol, base URL, default model, and API key variable) are stored separately in `.aigit/providers.json` — see [Providers](#providers) below.
 
 ---
 
@@ -248,13 +256,16 @@ A template is available:
 aigit's AI providers are split into two layers:
 
 - **Protocols** — built into aigit's code: `fake`, `openai-compatible`, and `anthropic`.
-- **Definitions** — named providers you configure, each backed by one of the protocols above.
+- **Definitions** — named providers configured for the current project, each backed by one of the protocols above.
 
-Only the `fake` provider is available out of the box. To use a real AI provider, define it in:
+The `fake` provider is built into aigit and does not need to be defined in a project configuration file. To use a real AI provider, add its definition to:
 
 ```text
 .aigit/providers.json
 ```
+
+The `.aigit/` directory is project-specific. Its `config.json` selects and configures provider usage, while `providers.json` defines the providers available to that project.
+
 
 Example, defining an OpenAI provider and an Anthropic provider:
 
@@ -290,15 +301,17 @@ Provider definition fields:
 | `api_key_environment_variable` | Name of the environment variable holding the API key |
 | `default_model` | Model used when `provider.model` is not set in `config.json` |
 
-The top-level `default` key selects which provider is used when `provider.name` (and `commit.provider`) are not set in `config.json`.
+The top-level `default` key selects which provider is used when `provider.name` and `commit.provider` are not set in `.aigit/config.json`.
+
 
 ## Provider Selection
 
 When resolving which provider to use, aigit applies these rules in order:
 
-1. `commit.provider` in `config.json`, if set.
-2. Otherwise `provider.name` in `config.json`, if set.
-3. Otherwise the `default` key in `providers.json`, if set.
+1. `commit.provider` in `.aigit/config.json`, if set.
+2. Otherwise `provider.name` in `.aigit/config.json`, if set.
+3. Otherwise the `default` key in `.aigit/providers.json`, if set.
+
 4. Otherwise, if exactly one non-`fake` provider is defined, that provider is used automatically.
 5. Otherwise, aigit raises an error: with zero non-`fake` providers defined it reports that no usable provider is configured; with more than one it asks you to set a provider explicitly.
 
@@ -391,9 +404,10 @@ python -m pip install -e ".[dev]"
 
 ```text
 aigit/
-├── .aigit/
-│   ├── config.json
-│   └── providers.json
+├── .aigit/                  # project-specific aigit configuration
+│   ├── config.json          # provider and command settings
+│   └── providers.json       # provider definitions
+
 ├── .github/
 │   └── workflows/
 ├── scripts/
