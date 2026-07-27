@@ -169,7 +169,7 @@ def test_unknown_provider_fails(tmp_path) -> None:
         registry.select("missing")
 
 
-def test_unsupported_protocol_fails(tmp_path) -> None:
+def test_anthropic_protocol_is_supported(tmp_path) -> None:
     write_providers_file(
         tmp_path,
         {
@@ -177,11 +177,39 @@ def test_unsupported_protocol_fails(tmp_path) -> None:
                 "anthropic": {
                     "display_name": "Anthropic",
                     "protocol": "anthropic",
-                    "base_url": "https://api.anthropic.com",
+                    "base_url": None,
                     "api_key_environment_variable": "ANTHROPIC_API_KEY",
-                    "default_model": "claude",
+                    "default_model": "claude-test-model",
                 }
-            },
+            }
+        },
+    )
+
+    registry = load_provider_registry(tmp_path)
+
+    definition = registry.get("anthropic")
+
+    assert definition.name == "anthropic"
+    assert definition.display_name == "Anthropic"
+    assert definition.protocol == "anthropic"
+    assert definition.base_url is None
+    assert definition.api_key_environment_variable == "ANTHROPIC_API_KEY"
+    assert definition.default_model == "claude-test-model"
+
+
+def test_unsupported_protocol_fails(tmp_path) -> None:
+    write_providers_file(
+        tmp_path,
+        {
+            "providers": {
+                "unknown": {
+                    "display_name": "Unknown",
+                    "protocol": "unsupported",
+                    "base_url": None,
+                    "api_key_environment_variable": None,
+                    "default_model": "unknown-model",
+                }
+            }
         },
     )
 
