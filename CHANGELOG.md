@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.8.1](https://github.com/imIwKy/aigit/compare/aigit-v0.8.0...aigit-v0.8.1) (2026-07-27)
+
+
+### Documentation
+
+* **README:** update project configuration and directory structure ([#34](https://github.com/imIwKy/aigit/issues/34)) ([9a1a8a7](https://github.com/imIwKy/aigit/commit/9a1a8a7193c2edf8e27c7addefb6fa0e25ec4569))
+
 ## [0.8.0](https://github.com/imIwKy/aigit/compare/aigit-v0.7.0...aigit-v0.8.0) (2026-07-27)
 
 
