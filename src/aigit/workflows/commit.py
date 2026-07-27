@@ -2,7 +2,7 @@ import logging
 import os
 import shlex
 import shutil
-import subprocess
+import subprocess  # nosec B404 - required to launch the configured editor
 import tempfile
 from pathlib import Path
 from typing import Callable
