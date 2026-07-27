@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.8.0](https://github.com/imIwKy/aigit/compare/aigit-v0.7.0...aigit-v0.8.0) (2026-07-27)
+
+
+### Features
+
+* **aigit:** add support for Anthropic provider ([#31](https://github.com/imIwKy/aigit/issues/31)) ([7ddb995](https://github.com/imIwKy/aigit/commit/7ddb99537bd290fa71acdce01c563df68ac7a3ed))
+
 ## [0.7.0](https://github.com/imIwKy/aigit/compare/aigit-v0.6.0...aigit-v0.7.0) (2026-07-27)
 
 
