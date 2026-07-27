@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.7.0](https://github.com/imIwKy/aigit/compare/aigit-v0.6.0...aigit-v0.7.0) (2026-07-27)
+
+
+### Features
+
+* **aigit/workflows/commit.py:** add commit message editing functiona… ([#29](https://github.com/imIwKy/aigit/issues/29)) ([20865db](https://github.com/imIwKy/aigit/commit/20865dbf943f306a5980b8d362ae79cba9439626))
+
 ## [0.6.0](https://github.com/imIwKy/aigit/compare/aigit-v0.5.0...aigit-v0.6.0) (2026-07-26)
 
 
