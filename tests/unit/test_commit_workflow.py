@@ -89,3 +89,41 @@ def test_commit_fails_when_provider_returns_empty_message(capsys) -> None:
     assert result == 1
     assert repository.committed_messages == []
     assert "empty commit message" in capsys.readouterr().out
+
+
+def test_commit_uses_manually_edited_message(monkeypatch) -> None:
+    repository = FakeRepository()
+    provider = FakeProvider()
+
+    monkeypatch.setattr(
+        "aigit.workflows.commit.edit_commit_message",
+        lambda message: "fix: edited commit message",
+    )
+    monkeypatch.setattr("builtins.input", lambda _: "e")
+
+    # The implementation should then prompt again for final approval.
+    answers = iter(["e", "y"])
+    monkeypatch.setattr("builtins.input", lambda _: next(answers))
+
+    result = run_commit_workflow(repository, provider)
+
+    assert result == 0
+    assert repository.committed_messages == [
+        "fix: edited commit message",
+    ]
+
+
+def test_commit_can_regenerate_message(monkeypatch) -> None:
+    repository = FakeRepository()
+    provider = FakeProvider(message="feat: regenerated message")
+
+    answers = iter(["r", "y"])
+    monkeypatch.setattr("builtins.input", lambda _: next(answers))
+
+    result = run_commit_workflow(repository, provider)
+
+    assert result == 0
+    assert repository.committed_messages == [
+        "feat: regenerated message",
+    ]
+    assert provider.received_diff == repository.diff

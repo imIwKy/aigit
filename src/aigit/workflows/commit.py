@@ -1,9 +1,121 @@
 import logging
+import os
+import shlex
+import shutil
+import subprocess
+import tempfile
+from pathlib import Path
+from typing import Callable
 
 from aigit.git import GitError, GitRepositoryPort
 from aigit.providers import LlmProvider
 
 logger = logging.getLogger(__name__)
+editor_logger = logging.getLogger("aigit.editor")
+
+
+EditorRunner = Callable[..., subprocess.CompletedProcess[str]]
+ExecutableFinder = Callable[[str], str | None]
+
+
+def edit_commit_message(
+    message: str,
+    *,
+    editor_runner: EditorRunner | None = None,
+    executable_finder: ExecutableFinder | None = None,
+) -> str:
+    run_editor = editor_runner or subprocess.run
+    find_executable = executable_finder or shutil.which
+
+    configured_editor = os.environ.get("VISUAL") or os.environ.get("EDITOR")
+
+    if configured_editor:
+        command = shlex.split(
+            configured_editor,
+            posix=os.name != "nt",
+        )
+
+        if os.name == "nt":
+            command = [argument.strip('"') for argument in command]
+
+        executable = find_executable(command[0])
+
+        if executable is None:
+            raise RuntimeError(
+                f"Configured editor '{command[0]}' was not found on PATH. "
+                "Set VISUAL or EDITOR to an installed editor."
+            )
+
+        command[0] = executable
+    else:
+        executable = find_executable("notepad.exe")
+
+        if executable is None:
+            raise RuntimeError(
+                "No editor configured. Set the VISUAL or EDITOR environment variable."
+            )
+
+        command = [executable]
+
+    if executable is None:
+        raise RuntimeError(
+            f"Configured editor '{command[0]}' was not found on PATH. "
+            "Set VISUAL or EDITOR to an installed editor."
+        )
+
+    command[0] = executable
+
+    with tempfile.NamedTemporaryFile(
+        mode="w",
+        encoding="utf-8",
+        suffix=".txt",
+        prefix="aigit-commit-",
+        delete=False,
+    ) as temporary_file:
+        temporary_file.write(message)
+        temporary_file.write("\n")
+        temporary_path = Path(temporary_file.name)
+
+    try:
+        command.append(str(temporary_path))
+
+        editor_logger.debug("Temporary commit file: %s", temporary_path)
+        editor_logger.debug("Launching editor command: %r", command)
+
+        result = run_editor(
+            command,
+            check=False,
+            shell=False,
+            capture_output=True,
+            text=True,
+        )
+
+        for line in result.stdout.splitlines():
+            editor_logger.debug("stdout: %s", line)
+
+        for line in result.stderr.splitlines():
+            editor_logger.debug("stderr: %s", line)
+
+        if result.returncode != 0:
+            error_detail = result.stderr.strip()
+
+            if error_detail:
+                raise RuntimeError(
+                    f"Editor exited with status {result.returncode}: {error_detail}"
+                )
+
+            raise RuntimeError(f"Editor exited with status {result.returncode}.")
+
+        edited_message = temporary_path.read_text(
+            encoding="utf-8",
+        ).strip()
+
+        if not edited_message:
+            raise RuntimeError("Edited commit message cannot be empty.")
+
+        return edited_message
+    finally:
+        temporary_path.unlink(missing_ok=True)
 
 
 def run_commit_workflow(
@@ -24,8 +136,6 @@ def run_commit_workflow(
         print(f"Error: {error}")
         return 1
 
-    logger.debug("Read staged diff containing %d characters", len(diff))
-
     if not diff.strip():
         logger.debug("No staged changes found")
         print("No staged changes found.")
@@ -43,17 +153,56 @@ def run_commit_workflow(
         print("Error: provider returned an empty commit message.")
         return 1
 
-    print("\nSuggested commit message:")
-    print("--------------------------------")
-    print(message)
-    print("--------------------------------")
+    while True:
+        print("\nSuggested commit message:")
+        print("--------------------------------")
+        print(message)
+        print("--------------------------------")
 
-    answer = input("Create this commit? [y/N]: ").strip().lower()
+        answer = (
+            input("Choose an action: [y]es, [e]dit, [r]egenerate, [N]o: ")
+            .strip()
+            .lower()
+        )
 
-    if answer not in {"y", "yes"}:
-        logger.debug("User declined commit")
-        print("Commit cancelled.")
-        return 0
+        if answer in {"", "n", "no", "c", "cancel"}:
+            logger.debug("User cancelled commit")
+            print("Commit cancelled.")
+            return 0
+
+        if answer in {"y", "yes"}:
+            break
+
+        if answer in {"e", "edit"}:
+            try:
+                message = edit_commit_message(message)
+            except (OSError, RuntimeError) as error:
+                logger.debug("Commit message editing failed", exc_info=True)
+                print(f"Error editing commit message: {error}")
+                return 1
+
+            continue
+
+        if answer in {"r", "retry", "regenerate"}:
+            logger.debug("Regenerating commit message")
+
+            try:
+                message = provider.generate_commit_message(diff).strip()
+            except Exception as error:
+                logger.debug(
+                    "Provider failed during message regeneration",
+                    exc_info=True,
+                )
+                print(f"Error generating commit message: {error}")
+                return 1
+
+            if not message:
+                print("Error: provider returned an empty commit message.")
+                return 1
+
+            continue
+
+        print("Invalid choice. Select y, e, r, or n.")
 
     try:
         repository.commit(message)
