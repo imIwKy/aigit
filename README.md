@@ -13,7 +13,7 @@ git add
   ↓
 aigit commit
   ↓
-review and approve
+review, edit, or regenerate
   ↓
 git commit
 ```
@@ -29,16 +29,18 @@ This section contains information for users installing and using aigit.
 ## Features
 
 - Generate commit messages from staged Git changes
-- OpenAI provider support
-- Fake provider for local testing
+- Review, edit, regenerate, or reject a suggested message before it is committed
+- Pluggable AI providers: bring your own OpenAI-compatible or Anthropic-compatible endpoint, defined in project configuration
+- Built-in fake provider for local testing without API calls
 - Project-level configuration
 - Environment-based secret loading
+- Optional debug logging for troubleshooting
 
 ## Requirements
 
 - Python 3.11+
 - Git
-- An API key for the configured AI provider
+- An API key for the configured AI provider (not required when using the fake provider)
 
 ## Installation
 
@@ -116,10 +118,44 @@ feat(provider): add OpenAI commit provider
 - Add provider tests
 --------------------------------
 
-Create this commit? [y/N]:
+Choose an action: [y]es, [e]dit, [r]egenerate, [N]o:
 ```
 
-Only approving the prompt creates the commit.
+At the prompt you can:
+
+- `y` — create the commit with the suggested message.
+- `e` — open the message in an editor before committing (see [Editing Commit Messages](#editing-commit-messages)).
+- `r` — discard the suggestion and ask the provider to generate a new one.
+- `N` (or Enter) — cancel without creating a commit.
+
+Only choosing `y` (optionally after editing) creates the commit.
+
+### Editing Commit Messages
+
+Choosing `e` opens the suggested message in an editor:
+
+- aigit uses the `VISUAL` environment variable if set, otherwise `EDITOR`.
+- If neither is set, aigit falls back to Notepad, which is only available on Windows. On Linux and macOS, set `VISUAL` or `EDITOR` to use the edit option.
+- The message is written to a temporary file, opened in the editor, and read back once the editor exits. An empty file is rejected.
+
+### Other Commands
+
+```bash
+aigit docs
+aigit pr
+```
+
+The `docs` and `pr` subcommands are registered in the CLI but are not implemented yet; running them prints a "not implemented" message and exits successfully.
+
+### Debug Logging
+
+Pass `--debug` before the subcommand to enable detailed diagnostic logging on stderr, including which provider and configuration values were selected:
+
+```bash
+aigit --debug commit
+```
+
+Without `--debug`, only warnings and errors are shown.
 
 ---
 
@@ -151,14 +187,17 @@ Configuration options:
 
 | Setting | Description |
 |---|---|
-| `name` | Provider identifier |
-| `model` | AI model override |
-| `temperature` | AI response temperature |
-| `system_prompt` | Instructions sent to the provider |
-| `fake_message` | Fake provider response |
-| `max_title_length` | Maximum commit title length |
+| `provider.name` | Name of the provider to use, matching a key in `.aigit/providers.json` (or `fake`) |
+| `provider.model` | AI model override; falls back to the provider's default model |
+| `provider.temperature` | AI response temperature |
+| `provider.system_prompt` | Instructions sent to the provider |
+| `provider.fake_message` | Message returned by the fake provider |
+| `commit.provider` | Overrides `provider.name` specifically for the commit workflow |
+| `commit.max_title_length` | Maximum commit title length (currently informational; not yet enforced by the CLI) |
 
-Provider implementations may provide defaults such as API endpoints and environment variable names. Project configuration overrides those defaults.
+If `.aigit/config.json` is missing, aigit runs with defaults (no provider selected by name, `temperature` `0.2`, `max_title_length` `72`).
+
+Provider *implementations* (their protocol, base URL, default model, and API key variable) are defined separately, in `.aigit/providers.json` — see [Providers](#providers) below.
 
 ---
 
@@ -188,7 +227,7 @@ Alternatively:
 ~/.config/aigit/.env
 ```
 
-Environment variables take precedence over `.env` values:
+aigit loads the global `~/.config/aigit/.env` file first, then the project-level `.env` file. Environment variables already set — either exported in your shell or loaded from the global file — always take precedence over values in the project `.env` file:
 
 ```bash
 export OPENAI_API_KEY="your-api-key"
@@ -206,9 +245,66 @@ A template is available:
 
 # Providers
 
+aigit's AI providers are split into two layers:
+
+- **Protocols** — built into aigit's code: `fake`, `openai-compatible`, and `anthropic`.
+- **Definitions** — named providers you configure, each backed by one of the protocols above.
+
+Only the `fake` provider is available out of the box. To use a real AI provider, define it in:
+
+```text
+.aigit/providers.json
+```
+
+Example, defining an OpenAI provider and an Anthropic provider:
+
+```json
+{
+  "default": "openai",
+  "providers": {
+    "openai": {
+      "display_name": "OpenAI",
+      "protocol": "openai-compatible",
+      "base_url": "https://api.openai.com/v1",
+      "api_key_environment_variable": "OPENAI_API_KEY",
+      "default_model": "gpt-4o-mini"
+    },
+    "claude": {
+      "display_name": "Anthropic",
+      "protocol": "anthropic",
+      "base_url": null,
+      "api_key_environment_variable": "ANTHROPIC_API_KEY",
+      "default_model": "claude-3-5-sonnet-latest"
+    }
+  }
+}
+```
+
+Provider definition fields:
+
+| Field | Description |
+|---|---|
+| `display_name` | Human-readable name for the provider |
+| `protocol` | One of `openai-compatible`, `anthropic`, or `fake` |
+| `base_url` | API base URL (required for `openai-compatible`; ignored for `anthropic` and `fake`) |
+| `api_key_environment_variable` | Name of the environment variable holding the API key |
+| `default_model` | Model used when `provider.model` is not set in `config.json` |
+
+The top-level `default` key selects which provider is used when `provider.name` (and `commit.provider`) are not set in `config.json`.
+
+## Provider Selection
+
+When resolving which provider to use, aigit applies these rules in order:
+
+1. `commit.provider` in `config.json`, if set.
+2. Otherwise `provider.name` in `config.json`, if set.
+3. Otherwise the `default` key in `providers.json`, if set.
+4. Otherwise, if exactly one non-`fake` provider is defined, that provider is used automatically.
+5. Otherwise, aigit raises an error: with zero non-`fake` providers defined it reports that no usable provider is configured; with more than one it asks you to set a provider explicitly.
+
 ## Fake Provider
 
-The fake provider allows testing without making API requests.
+The fake provider allows testing without making API requests. It requires no entry in `providers.json` and no API key.
 
 Example:
 
@@ -221,9 +317,9 @@ Example:
 }
 ```
 
-## OpenAI Provider
+## OpenAI-Compatible Provider
 
-Example:
+The `openai-compatible` protocol works with the OpenAI API as well as any service exposing an OpenAI-compatible chat completions endpoint (for example, locally hosted models), by pointing `base_url` at that service.
 
 ```json
 {
@@ -234,13 +330,22 @@ Example:
 }
 ```
 
-The OpenAI provider uses:
+The API key is read from whichever environment variable is set as `api_key_environment_variable` in the provider's definition (`OPENAI_API_KEY` in the example above). If a provider definition omits `api_key_environment_variable`, a placeholder key is used, which is appropriate for local endpoints that don't require authentication.
 
-```text
-OPENAI_API_KEY
+## Anthropic Provider
+
+The `anthropic` protocol talks to the Anthropic Messages API.
+
+```json
+{
+  "provider": {
+    "name": "claude",
+    "model": "claude-3-5-sonnet-latest"
+  }
+}
 ```
 
-for authentication.
+An `api_key_environment_variable` is required for the `anthropic` protocol (for example, `ANTHROPIC_API_KEY`).
 
 ---
 
@@ -287,7 +392,8 @@ python -m pip install -e ".[dev]"
 ```text
 aigit/
 ├── .aigit/
-│   └── config.json
+│   ├── config.json
+│   └── providers.json
 ├── .github/
 │   └── workflows/
 ├── scripts/
@@ -297,9 +403,22 @@ aigit/
 │       ├── __main__.py
 │       ├── cli.py
 │       ├── git.py
+│       ├── logging_config.py
 │       ├── config/
+│       │   ├── environment.py
+│       │   ├── loader.py
+│       │   └── models.py
 │       ├── providers/
+│       │   ├── anthropic.py
+│       │   ├── base.py
+│       │   ├── definitions.py
+│       │   ├── factory.py
+│       │   ├── fake.py
+│       │   ├── loader.py
+│       │   ├── openai_compatible.py
+│       │   └── registry.py
 │       └── workflows/
+│           └── commit.py
 ├── tests/
 │   ├── unit/
 │   └── regression/
@@ -316,15 +435,17 @@ aigit separates Git workflow handling from AI provider implementations.
 
 The provider layer handles:
 
-- Communication with AI services
-- Provider-specific configuration
+- Loading provider definitions from `.aigit/providers.json`
+- Selecting the appropriate provider (`ProviderRegistry`) and constructing it (`ProviderFactory`)
+- Communication with AI services (`fake`, `openai-compatible`, `anthropic` protocols)
 - Generating commit suggestions
 
 The workflow layer handles:
 
-- Git interaction
+- Git interaction (`GitRepository`)
 - Reading staged changes
-- User approval
+- Presenting the suggestion and collecting approval, edits, or regeneration requests
+- Launching an external editor when the user chooses to edit a message
 - Commit creation
 
 The goal is to keep providers replaceable and prevent provider-specific logic from leaking into the core workflow.
@@ -387,6 +508,8 @@ Generate combined security reports:
 python scripts/security_report.py
 ```
 
+By default this reads `bandit-report.json` and `pip-audit-report.json` from the current directory and writes `security-report.md`. Pass `--bandit`, `--pip-audit`, or `--output` to use different paths.
+
 Generated reports should not be committed.
 
 ---
@@ -398,6 +521,7 @@ The repository uses:
 - Ruff formatting and linting
 - Bandit security scanning
 - pip-audit dependency scanning
+- Gitleaks secret scanning
 - GitHub Actions CI
 - Release automation
 
