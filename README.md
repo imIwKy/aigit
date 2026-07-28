@@ -141,11 +141,10 @@ Choosing `e` opens the suggested message in an editor:
 ### Other Commands
 
 ```bash
-aigit docs
 aigit pr
 ```
 
-The `docs` and `pr` subcommands are registered in the CLI but are not implemented yet; running them prints a "not implemented" message and exits successfully.
+The`pr` subcommand is registered in the CLI but not implemented yet; running it prints a "not implemented" message and exits successfully.
 
 ### Debug Logging
 

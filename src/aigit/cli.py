@@ -43,11 +43,6 @@ def build_parser() -> argparse.ArgumentParser:
     )
 
     commands.add_parser(
-        "docs",
-        help="Synchronize documentation with recent changes.",
-    )
-
-    commands.add_parser(
         "pr",
         help="Generate and create a pull request.",
     )
@@ -92,10 +87,6 @@ def run_command(args: argparse.Namespace) -> int:
             return 1
 
         return run_commit_workflow(repository, provider)
-
-    if args.command == "docs":
-        print("docs workflow not implemented")
-        return 0
 
     if args.command == "pr":
         print("pr workflow not implemented")
