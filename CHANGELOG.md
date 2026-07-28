@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.8.2](https://github.com/imIwKy/aigit/compare/aigit-v0.8.1...aigit-v0.8.2) (2026-07-28)
+
+
+### Bug Fixes
+
+* **cli:** remove unimplemented 'docs' command from README and CLI ([#36](https://github.com/imIwKy/aigit/issues/36)) ([2f78540](https://github.com/imIwKy/aigit/commit/2f78540060ebf30c8f2ce7a852d3fe987dd229dc))
+
 ## [0.8.1](https://github.com/imIwKy/aigit/compare/aigit-v0.8.0...aigit-v0.8.1) (2026-07-27)
 
 
