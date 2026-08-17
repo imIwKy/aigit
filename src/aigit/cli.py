@@ -1,6 +1,7 @@
 import argparse
 import logging
 from collections.abc import Sequence
+from importlib.metadata import PackageNotFoundError, version
 
 from aigit.config.environment import load_environment
 from aigit.config.loader import ConfigError, load_config
@@ -22,7 +23,7 @@ def build_parser() -> argparse.ArgumentParser:
     parser.add_argument(
         "--version",
         action="version",
-        version="aigit 0.1.0",
+        version=f"aigit {get_application_version()}",
     )
 
     parser.add_argument(
@@ -84,6 +85,13 @@ def run_command(args: argparse.Namespace) -> int:
         return run_commit_workflow(repository, provider)
 
     return 1
+
+
+def get_application_version() -> str:
+    try:
+        return version("aigit")
+    except PackageNotFoundError:
+        return "development"
 
 
 def main(argv: Sequence[str] | None = None) -> None:
