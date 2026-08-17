@@ -2,6 +2,7 @@ from types import SimpleNamespace
 from typing import Any
 
 import pytest
+from tests.unit.test_commit_workflow import FakeProvider, FakeRepository
 
 from aigit.config.models import ProviderConfig
 from aigit.providers.anthropic import (
@@ -9,6 +10,7 @@ from aigit.providers.anthropic import (
     AnthropicProviderError,
 )
 from aigit.providers.definitions import ProviderDefinition
+from aigit.workflows.commit import run_commit_workflow
 
 
 def anthropic_definition() -> ProviderDefinition:
@@ -51,6 +53,29 @@ class FakeAnthropicClient:
             response=response,
             error=error,
         )
+
+
+def test_commit_rejects_title_over_configured_limit(
+    monkeypatch,
+    capsys,
+) -> None:
+    repository = FakeRepository()
+    provider = FakeProvider(
+        message="feat: this commit title is too long",
+    )
+
+    answers = iter(["y", "n"])
+    monkeypatch.setattr("builtins.input", lambda _: next(answers))
+
+    result = run_commit_workflow(
+        repository,
+        provider,
+        max_title_length=10,
+    )
+
+    assert result == 0
+    assert repository.committed_messages == []
+    assert "maximum is 10" in capsys.readouterr().out
 
 
 def test_anthropic_provider_sends_expected_request(

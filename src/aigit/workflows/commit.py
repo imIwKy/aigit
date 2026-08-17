@@ -18,6 +18,24 @@ EditorRunner = Callable[..., subprocess.CompletedProcess[str]]
 ExecutableFinder = Callable[[str], str | None]
 
 
+def validate_commit_title(
+    message: str,
+    max_title_length: int,
+) -> str | None:
+    if max_title_length <= 0:
+        raise ValueError("Maximum commit title length must be greater than zero.")
+
+    title = message.splitlines()[0] if message.splitlines() else ""
+
+    if len(title) > max_title_length:
+        return (
+            f"Commit title is {len(title)} characters long; "
+            f"the maximum is {max_title_length}."
+        )
+
+    return None
+
+
 def edit_commit_message(
     message: str,
     *,
@@ -119,8 +137,7 @@ def edit_commit_message(
 
 
 def run_commit_workflow(
-    repository: GitRepositoryPort,
-    provider: LlmProvider,
+    repository: GitRepositoryPort, provider: LlmProvider, max_title_length: int = 72
 ) -> int:
     logger.debug("Starting commit workflow")
 
@@ -171,6 +188,16 @@ def run_commit_workflow(
             return 0
 
         if answer in {"y", "yes"}:
+            validation_error = validate_commit_title(
+                message,
+                max_title_length,
+            )
+
+            if validation_error:
+                print(f"Cannot create commit: {validation_error}")
+                print("Edit or regenerate the message.")
+                continue
+
             break
 
         if answer in {"e", "edit"}:

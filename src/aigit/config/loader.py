@@ -38,6 +38,14 @@ def load_config(project_root: Path | None = None) -> AppConfig:
 
     configured_provider_name = provider_values.get("name")
     command_provider_name = commit_values.get("provider")
+    max_title_length = commit_values.get("max_title_length", 72)
+
+    if (
+        isinstance(max_title_length, bool)
+        or not isinstance(max_title_length, int)
+        or max_title_length <= 0
+    ):
+        raise ConfigError("'commit.max_title_length' must be a positive integer.")
 
     logger.debug(
         "Loaded configuration: provider=%s, commit_provider=%s",

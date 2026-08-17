@@ -7,6 +7,28 @@ from aigit.config.models import ProviderConfig
 from aigit.providers import FakeProvider
 
 
+def test_load_config_rejects_invalid_max_title_length(tmp_path) -> None:
+    config_directory = tmp_path / ".aigit"
+    config_directory.mkdir()
+
+    (config_directory / "config.json").write_text(
+        json.dumps(
+            {
+                "commit": {
+                    "max_title_length": 0,
+                },
+            }
+        ),
+        encoding="utf-8",
+    )
+
+    with pytest.raises(
+        ConfigError,
+        match="max_title_length.*positive integer",
+    ):
+        load_config(tmp_path)
+
+
 def test_load_config_returns_defaults_when_file_is_missing(tmp_path) -> None:
     config = load_config(tmp_path)
 
