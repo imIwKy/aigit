@@ -86,6 +86,7 @@ def run_command(args: argparse.Namespace) -> int:
 
     return 1
 
+
 def get_application_version() -> str:
     try:
         return version("aigit")
