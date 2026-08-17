@@ -42,11 +42,6 @@ def build_parser() -> argparse.ArgumentParser:
         help="Generate a commit message from staged changes.",
     )
 
-    commands.add_parser(
-        "pr",
-        help="Generate and create a pull request.",
-    )
-
     return parser
 
 
@@ -87,10 +82,6 @@ def run_command(args: argparse.Namespace) -> int:
             return 1
 
         return run_commit_workflow(repository, provider)
-
-    if args.command == "pr":
-        print("pr workflow not implemented")
-        return 0
 
     return 1
 

@@ -138,14 +138,6 @@ Choosing `e` opens the suggested message in an editor:
 - If neither is set, aigit falls back to Notepad, which is only available on Windows. On Linux and macOS, set `VISUAL` or `EDITOR` to use the edit option.
 - The message is written to a temporary file, opened in the editor, and read back once the editor exits. An empty file is rejected.
 
-### Other Commands
-
-```bash
-aigit pr
-```
-
-The`pr` subcommand is registered in the CLI but not implemented yet; running it prints a "not implemented" message and exits successfully.
-
 ### Debug Logging
 
 Pass `--debug` before the subcommand to enable detailed diagnostic logging on stderr, including which provider and configuration values were selected:
