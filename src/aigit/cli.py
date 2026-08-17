@@ -82,7 +82,9 @@ def run_command(args: argparse.Namespace) -> int:
             print(f"Git error: {error}")
             return 1
 
-        return run_commit_workflow(repository, provider)
+        return run_commit_workflow(
+            repository, provider, max_title_length=config.commit.max_title_length
+        )
 
     return 1
 
