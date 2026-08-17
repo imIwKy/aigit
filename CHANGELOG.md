@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.9.0](https://github.com/imIwKy/aigit/compare/aigit-v0.8.3...aigit-v0.9.0) (2026-08-17)
+
+
+### Features
+
+* **aigit:** add commit title length validation and configuration ([#41](https://github.com/imIwKy/aigit/issues/41)) ([11c6b55](https://github.com/imIwKy/aigit/commit/11c6b551628df94323ce294b804c5901e061a905))
+
 ## [0.8.3](https://github.com/imIwKy/aigit/compare/aigit-v0.8.2...aigit-v0.8.3) (2026-08-17)
 
 
