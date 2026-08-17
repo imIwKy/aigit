@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.8.3](https://github.com/imIwKy/aigit/compare/aigit-v0.8.2...aigit-v0.8.3) (2026-08-17)
+
+
+### Documentation
+
+* **README:** remove reference to unimplemented 'pr' command ([#38](https://github.com/imIwKy/aigit/issues/38)) ([730464f](https://github.com/imIwKy/aigit/commit/730464f167454dcabf06e72331a957b7fc549d70))
+
 ## [0.8.2](https://github.com/imIwKy/aigit/compare/aigit-v0.8.1...aigit-v0.8.2) (2026-07-28)
 
 
